@@ -38,11 +38,10 @@ A [blink.cmp](https://github.com/Saghen/blink.cmp) source for basic math calcula
 
 Simply type a mathematical expression and the completion menu will show the result:
 
-- `2+2` → suggests `4`
-- `10*5+3` → suggests `53`
-- `sqrt(16)` → suggests `4.0`
-- `sin(3.14159/2)` → suggests `1.0`
 - `2+2=` → suggests `4` and `2+2 = 4`
+- `10*5+3` → suggests `53` and `10*5+3 = 53`
+- `sqrt(16)` → suggests `4.0` and `sqrt(16) = 4.0`
+- `sin(3.14159/2)` → suggests `1.0` and `sin(3.14159/2) = 1.0`
 
 ## Testing
 

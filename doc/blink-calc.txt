@@ -24,8 +24,17 @@ FEATURES                                                  *blink-calc-features*
 - Evaluates math expressions in real-time as you type
 - Basic arithmetic operations: `+`, `-`, `*`, `/`
 - Parentheses for complex expressions
-- Lua math library functions (`sin`, `cos`, `sqrt`, ...) and the `ln` alias
-- Two completion items: the bare result and the full `expr = result`
+- Lua math library functions (`sin`, `cos`, `sqrt`, ...) plus `ln`, `log2`,
+  `log10`, `mod`
+- Constants: `pi`, `e`, `phi`, `tau`
+- Factorial `5!` and combinatorics: `fact`, `gcd`, `lcm`, `perm`, `comb`
+- Statistics: `sum`, `avg`, `mean`, `median`, `min`, `max`
+- Bitwise functions: `band`, `bor`, `bxor`, `bnot`, `lshift`, `rshift`
+- Percentages: `20% of 150`, `150 + 20%`, `50%`
+- Number bases: `0xFF`/`0b1010` input and optional hex/binary result items
+- Digit separators in input (`1_000_000`) and optional grouped result items
+- Configurable result precision and equation separator
+- The bare result, the full `expr = result`, and optional base/grouped items
 
 ================================================================================
 REQUIREMENTS                                          *blink-calc-requirements*
@@ -67,7 +76,11 @@ Options are passed through the blink.cmp provider `opts` table:
 
 >lua
   {
-    show_equation = true, -- offer an extra "expr = result" item when typing '=' (boolean)
+    show_equation = true, -- extra "expr = result" item when typing '=' (boolean)
+    show_bases = false,   -- extra hex/binary items for integer results (boolean)
+    group_digits = false, -- grouped item for large integers; true uses ',' or a custom separator string
+    precision = 10,       -- decimal places used to tame floating-point noise (integer)
+    separator = " = ",    -- text between expression and result in the equation item (string)
   }
 <
 
@@ -78,8 +91,15 @@ Type a math expression and the completion menu shows the result:
 
 - `2+2=`           → `4` and `2+2 = 4`
 - `10*5+3`         → `53` and `10*5+3 = 53`
-- `sqrt(16)`       → `4.0`
-- `sin(3.14159/2)` → `1.0`
+- `sqrt(16)`       → `4`
+- `5!`             → `120`
+- `gcd(12,18)`     → `6`
+- `avg(2,4,6)`     → `4`
+- `20% of 150`     → `30`
+- `150 + 20%`      → `180`
+- `band(12,10)`    → `8`
+- `0xFF`           → `255` (with `show_bases`, also `0xFF`, `0b11111111`)
+- `1_000_000`      → `1000000` (with `group_digits`, also `1,000,000`)
 
 ================================================================================
 DEVELOPMENT                                            *blink-calc-development*

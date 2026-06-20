@@ -16,7 +16,7 @@ end
 
 ---@return string[]
 function source:get_trigger_characters()
-  return { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "+", "-", "*", "/", "=", "(", ")" }
+  return { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "+", "-", "*", "/", "=", "(", ")", "%", "!" }
 end
 
 ---@return boolean
@@ -44,6 +44,8 @@ function source:get_completions(ctx, callback)
   local before_len = #expr
   expr = expr:gsub("^%-%-+%s*", "")
   expr = expr:gsub("^#+%s*", "")
+  expr = expr:gsub("^//+%s*", "")
+  expr = expr:gsub("^/%*+%s*", "")
   chars_removed = chars_removed + (before_len - #expr)
 
   expr = expr:match("^(.-)%s*$") or expr
@@ -64,7 +66,7 @@ function source:get_completions(ctx, callback)
     return callback()
   end
 
-  local result_str = tostring(result)
+  local result_str = Calc.format(result, self.opts.precision)
   local kind = value_kind()
 
   ---@type lsp.Range
@@ -73,22 +75,29 @@ function source:get_completions(ctx, callback)
     ["end"] = { line = ctx.cursor[1] - 1, character = col },
   }
 
-  local items = {
-    {
-      label = result_str,
-      kind = kind,
-      textEdit = { newText = result_str, range = range },
-    },
-  }
+  local function item(text)
+    return { label = text, kind = kind, textEdit = { newText = text, range = range } }
+  end
+
+  local items = { item(result_str) }
+
+  local is_int = result == math.floor(result) and math.abs(result) < 2 ^ 53
+  if self.opts.show_bases and is_int and result >= 0 then
+    table.insert(items, item(Calc.to_hex(result)))
+    table.insert(items, item(Calc.to_bin(result)))
+  end
+
+  if self.opts.group_digits and is_int then
+    local grouped = Calc.group(result_str, self.opts.group_digits)
+    if grouped ~= result_str then
+      table.insert(items, item(grouped))
+    end
+  end
 
   local ends_with_eq = line:sub(col, col) == "=" or (col > 0 and line:sub(col - 1, col - 1) == "=")
   if self.opts.show_equation and ends_with_eq then
     local clean_expr = expr:gsub("=$", ""):gsub("%s+", " "):match("^%s*(.-)%s*$")
-    table.insert(items, {
-      label = clean_expr .. " = " .. result_str,
-      kind = kind,
-      textEdit = { newText = clean_expr .. " = " .. result_str, range = range },
-    })
+    table.insert(items, item(clean_expr .. self.opts.separator .. result_str))
   end
 
   callback({ items = items })

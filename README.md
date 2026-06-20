@@ -19,7 +19,7 @@ A [blink.cmp](https://github.com/Saghen/blink.cmp) source for basic math calcula
 ```lua
 {
   'saghen/blink.cmp',
-  dependencies = { { "joelazar/blink-calc" } },
+  dependencies = { 'joelazar/blink-calc' },
   opts = {
     sources = {
       default = { 'lsp', 'path', 'snippets', 'buffer', 'calc' },
@@ -27,12 +27,23 @@ A [blink.cmp](https://github.com/Saghen/blink.cmp) source for basic math calcula
         calc = {
           name = 'Calc',
           module = 'blink-calc',
+          opts = {
+            show_equation = true, -- offer an extra "expr = result" item when typing '='
+          },
         },
       },
     },
   },
 }
 ```
+
+## Configuration
+
+Options are passed through the blink.cmp provider `opts` table:
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `show_equation` | `boolean` | `true` | Offer an extra `expr = result` item when typing with `=` |
 
 ## Usage
 
@@ -43,13 +54,19 @@ Simply type a mathematical expression and the completion menu will show the resu
 - `sqrt(16)` → suggests `4.0` and `sqrt(16) = 4.0`
 - `sin(3.14159/2)` → suggests `1.0` and `sin(3.14159/2) = 1.0`
 
-## Testing
+## Development
 
-Run the test suite with:
+This plugin follows the [base.nvim](https://github.com/S1M0N38/base.nvim) project structure.
 
 ```bash
-nvim --headless -c "luafile tests/test_calc.lua" -c "qa"
+make test       # Run the test suite (mini.test via lazy.minit)
+make lint       # Check formatting with StyLua
+make typecheck  # Type check with lua-language-server
+make check      # lint + typecheck + test
+make dev        # Launch Neovim with repro/repro.lua
 ```
+
+See [`:help blink-calc`](doc/blink-calc.txt) and [CONTRIBUTING.md](CONTRIBUTING.md) for details, and run `:checkhealth blink-calc` to verify your setup.
 
 ## License
 

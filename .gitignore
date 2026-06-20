@@ -1,0 +1,4 @@
+.repro/
+doc/tags
+.DS_Store
+.tests/

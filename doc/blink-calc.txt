@@ -1,0 +1,134 @@
+================================================================================
+INTRODUCTION                                                       *blink-calc*
+
+blink-calc is a blink.cmp source that evaluates math expressions as you type,
+similar to cmp-calc.
+
+Links:
+- Changelog: https://github.com/joelazar/blink-calc/blob/main/CHANGELOG.md
+- License (MIT): https://github.com/joelazar/blink-calc/blob/main/LICENSE.md
+
+Table of contents:
+
+1. FEATURES: What this source provides.                   |blink-calc-features|
+2. REQUIREMENTS: Dependencies.                        |blink-calc-requirements|
+3. INSTALLATION: How to install and register.         |blink-calc-installation|
+4. CONFIGURATION: Available options and defaults.           |blink-calc-config|
+5. USAGE: How completions behave.                            |blink-calc-usage|
+6. DEVELOPMENT: Testing, formatting, releases.         |blink-calc-development|
+7. TROUBLESHOOTING: Common issues.                |blink-calc-troubleshooting|
+
+================================================================================
+FEATURES                                                  *blink-calc-features*
+
+- Evaluates math expressions in real-time as you type
+- Basic arithmetic operations: `+`, `-`, `*`, `/`
+- Parentheses for complex expressions
+- Lua math library functions (`sin`, `cos`, `sqrt`, ...) and the `ln` alias
+- Two completion items: the bare result and the full `expr = result`
+
+================================================================================
+REQUIREMENTS                                          *blink-calc-requirements*
+
+- Neovim ≥ 0.12.2
+- blink.cmp (https://github.com/Saghen/blink.cmp)
+- StyLua (https://github.com/JohnnyMorganz/StyLua) for formatting and linting
+- LuaLS (https://github.com/LuaLS/lua-language-server) for type checking
+- Make (https://www.gnu.org/software/make/) for build and test commands
+
+================================================================================
+INSTALLATION                                          *blink-calc-installation*
+
+Using lazy.nvim, register blink-calc as a blink.cmp provider:
+
+>lua
+  {
+    "saghen/blink.cmp",
+    dependencies = { "joelazar/blink-calc" },
+    opts = {
+      sources = {
+        default = { "lsp", "path", "snippets", "buffer", "calc" },
+        providers = {
+          calc = {
+            name = "Calc",
+            module = "blink-calc",
+            opts = { show_equation = true },
+          },
+        },
+      },
+    },
+  }
+<
+
+================================================================================
+CONFIGURATION                                               *blink-calc-config*
+
+Options are passed through the blink.cmp provider `opts` table:
+
+>lua
+  {
+    show_equation = true, -- offer an extra "expr = result" item when typing '=' (boolean)
+  }
+<
+
+================================================================================
+USAGE                                                        *blink-calc-usage*
+
+Type a math expression and the completion menu shows the result:
+
+- `2+2=`           → `4` and `2+2 = 4`
+- `10*5+3`         → `53` and `10*5+3 = 53`
+- `sqrt(16)`       → `4.0`
+- `sin(3.14159/2)` → `1.0`
+
+================================================================================
+DEVELOPMENT                                            *blink-calc-development*
+
+Testing: ~
+>bash
+  make test                               # Run all tests
+  make test-one MODULE=calc               # Run tests/calc_spec.lua
+  nvim -l tests/minit.lua --minitest tests/calc_spec.lua
+<
+
+Health Checks: ~
+>vim
+  :checkhealth blink-calc
+<
+
+Minimal Reproduction: ~
+>bash
+  nvim -u repro/repro.lua
+<
+
+Code Formatting and Types: ~
+>bash
+  make lint        # Check formatting with StyLua
+  make format      # Auto-format Lua files
+  make typecheck   # Type check with lua-language-server
+  make check       # lint + typecheck + test
+<
+
+Generate Help Tags: ~
+>vim
+  :helptags doc/
+<
+
+================================================================================
+TROUBLESHOOTING                                    *blink-calc-troubleshooting*
+
+First, run the health check:
+>vim
+  :checkhealth blink-calc
+<
+
+Then reproduce in a clean environment:
+
+1. Clone blink-calc and cd into the directory
+2. Run `nvim -u repro/repro.lua`
+3. Run `:checkhealth blink-calc`
+4. Reproduce the issue
+5. Report repro.lua and any error messages
+
+================================================================================
+vim:tw=78:ts=8:et:ft=help:norl:

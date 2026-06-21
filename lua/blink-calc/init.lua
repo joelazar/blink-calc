@@ -75,8 +75,9 @@ function source:get_completions(ctx, callback)
     ["end"] = { line = ctx.cursor[1] - 1, character = col },
   }
 
+  local filter_text = line:sub(expr_start_col, col)
   local function item(text)
-    return { label = text, kind = kind, textEdit = { newText = text, range = range } }
+    return { label = text, kind = kind, filterText = filter_text, textEdit = { newText = text, range = range } }
   end
 
   local items = { item(result_str) }

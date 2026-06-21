@@ -101,6 +101,17 @@ describe("non-math input", function()
   end)
 end)
 
+describe("item matching", function()
+  it("sets filterText to the covered expression so blink keeps word-ending exprs", function()
+    local item = complete("ln(2) + pi").items[1]
+    assert.are.equal("ln(2) + pi", item.filterText)
+  end)
+
+  it("sets filterText for digit-ending expressions too", function()
+    assert.are.equal("2+2", complete("2+2").items[1].filterText)
+  end)
+end)
+
 describe("constants and aliases", function()
   it("knows pi: 2*pi", function()
     assert.is_truthy(first("2*pi"):match("^6%.283"))

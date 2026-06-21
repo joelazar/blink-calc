@@ -6,7 +6,7 @@ local defaults = {
   show_equation = true,
   show_bases = false,
   group_digits = false,
-  precision = 10,
+  precision = 4,
   separator = " = ",
 }
 

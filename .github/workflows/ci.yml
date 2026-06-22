@@ -9,7 +9,7 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: JohnnyMorganz/stylua-action@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -19,12 +19,12 @@ jobs:
   typecheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: rhysd/action-setup-vim@v1
         with:
           neovim: true
           version: stable
-      - uses: jdx/mise-action@v2
+      - uses: jdx/mise-action@v4
       - name: Typecheck
         run: make typecheck
 
@@ -34,7 +34,7 @@ jobs:
       matrix:
         nvim_version: ["stable", "nightly"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: rhysd/action-setup-vim@v1
         with:
           neovim: true

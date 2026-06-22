@@ -180,6 +180,14 @@ describe("vectors", function()
   it("normalize yields a unit vector", function()
     assert.are.equal(1, Calc.evaluate("mag(norm(vec(3,4)))"))
   end)
+
+  it("rejects a vector with non-finite components (norm of the zero vector)", function()
+    assert.are.equal(nil, Calc.evaluate("norm(vec(0,0))"))
+  end)
+
+  it("does not surface a non-finite vector through the source", function()
+    assert.are.equal(nil, first_with({}, "norm(vec(0,0))"))
+  end)
 end)
 
 -- #3 Rich documentation popup ------------------------------------------------
@@ -311,15 +319,24 @@ describe("unit conversion", function()
     assert.are.equal(5, Calc.evaluate('convert(10, "usd", "eur")', { currency_rates = { usd = 1, eur = 2 } }))
   end)
 
+  it("converts currency case-insensitively against uppercase rate keys", function()
+    assert.are.equal(5, Calc.evaluate('convert(10, "USD", "EUR")', { currency_rates = { USD = 1, EUR = 2 } }))
+    assert.are.equal(5, Calc.evaluate("10 usd in eur", { currency_rates = { USD = 1, EUR = 2 } }))
+  end)
+
   it("offers a currency result through the source", function()
     assert.are.equal("5", first_with({ currency_rates = { usd = 1, eur = 2 } }, "10 usd in eur"))
   end)
 
   it("resolves currency from a provider function", function()
-    require("blink-calc.currency").reset()
+    local Currency = require("blink-calc.currency")
+    Currency.reset()
+    Currency.schedule = function(fn)
+      fn()
+    end
     local opts = {
-      currency_rates = function()
-        return { usd = 1, eur = 2 }
+      currency_rates = function(done)
+        done({ usd = 1, eur = 2 })
       end,
       currency_cache_path = vim.fn.tempname(),
     }

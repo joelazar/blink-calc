@@ -222,6 +222,10 @@ local TEMP_FROM_C = {
 ---@param rates table<string, number> currency code -> rate per base unit
 ---@return fun(value: number, from: string, to: string): number|nil
 local function make_convert(rates)
+  local lower_rates = {}
+  for code, rate in pairs(rates) do
+    lower_rates[code:lower()] = rate
+  end
   return function(value, from, to)
     from, to = from:lower(), to:lower()
     if TEMP_TO_C[from] and TEMP_FROM_C[to] then
@@ -230,8 +234,8 @@ local function make_convert(rates)
     if UNIT_FACTORS[from] and UNIT_FACTORS[to] and UNIT_DIMENSION[from] == UNIT_DIMENSION[to] then
       return value * UNIT_FACTORS[from] / UNIT_FACTORS[to]
     end
-    if rates[from] and rates[to] then
-      return value * rates[from] / rates[to]
+    if lower_rates[from] and lower_rates[to] then
+      return value * lower_rates[from] / lower_rates[to]
     end
     return nil
   end
@@ -475,21 +479,31 @@ function M.preprocess(expr)
   return M.rewrite_bitwise(expr)
 end
 
+---@param n any
+---@return boolean
+local function finite(n)
+  return type(n) == "number" and n == n and math.abs(n) ~= math.huge
+end
+
 ---Reduce a raw evaluation result to a supported value or nil.
 ---@param result any
 ---@return number|boolean|table|string|nil
 local function valid(result)
   local t = type(result)
   if t == "number" then
-    if result ~= result or math.abs(result) == math.huge then
-      return nil
-    end
-    return result
+    return finite(result) and result or nil
   elseif t == "boolean" or t == "string" then
     return result
   elseif t == "table" then
     local mt = getmetatable(result)
-    if mt == vec_mt or mt == date_mt or mt == dur_mt then
+    if mt == vec_mt then
+      for _, c in ipairs(result) do
+        if not finite(c) then
+          return nil
+        end
+      end
+      return result
+    elseif mt == date_mt or mt == dur_mt then
       return result
     end
   end

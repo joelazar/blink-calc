@@ -93,8 +93,14 @@ function M.merge(opts)
     reset("copy_register", "false or string")
   end
 
-  if type(config.currency_rates) ~= "table" and type(config.currency_rates) ~= "function" then
-    reset("currency_rates", "table or function")
+  local rates_type = type(config.currency_rates)
+  if rates_type == "string" then
+    if require("blink-calc.currency").providers[config.currency_rates] == nil then
+      local names = vim.tbl_keys(require("blink-calc.currency").providers)
+      reset("currency_rates", 'one of the built-in providers: "' .. table.concat(names, '", "') .. '"')
+    end
+  elseif rates_type ~= "table" and rates_type ~= "function" then
+    reset("currency_rates", "table, function, or built-in provider name")
   end
 
   if type(config.currency_cache_ttl) ~= "number" or config.currency_cache_ttl <= 0 then

@@ -103,7 +103,9 @@ Options are passed through the blink.cmp provider `opts` table:
     buffer_variables = false,  -- resolve `name = expr` assignments from earlier lines (boolean)
     copy_register = false,     -- register to copy the accepted result into, e.g. "+" (false or string)
     currency_rates = {},       -- currency code -> value in a shared base unit
-                               -- (table, or a function pulled once per day)
+                               -- (table; an async provider invoked as
+                               -- provider(done); or a built-in name, e.g.
+                               -- "er-api"; providers pulled once per day)
     currency_cache_ttl = 86400, -- seconds a provider's rates are reused (integer)
   }
 <

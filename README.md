@@ -78,7 +78,7 @@ Options are passed through the blink.cmp provider `opts` table:
 | `disabled_filetypes` | `string[]` | `{}` | Filetypes in which the source is disabled |
 | `buffer_variables` | `boolean` | `false` | Resolve `name = expr` assignments from earlier buffer lines |
 | `copy_register` | `false \| string` | `false` | Register to copy the accepted result into (e.g. `"+"`) |
-| `currency_rates` | `table<string, number> \| fun():table<string, number>` | `{}` | Currency code → value in a shared base unit. A static table is used as-is; a function is treated as a provider and called at most once per `currency_cache_ttl` (results cached on disk) |
+| `currency_rates` | `table<string, number> \| fun(done) \| string` | `{}` | Currency code → value in a shared base unit. A static table is used as-is; a function is an async provider invoked as `provider(done)` (call `done(rates)` when ready); a string names a built-in provider (e.g. `"er-api"`). Providers run off the completion path and are pulled at most once per `currency_cache_ttl` (results cached on disk) |
 | `currency_cache_ttl` | `integer` | `86400` | Seconds a provider's rates are reused before re-pulling (default: once per day) |
 
 ## Usage
@@ -107,30 +107,47 @@ Simply type a mathematical expression and the completion menu will show the resu
 
 ### Daily currency rates
 
-`currency_rates` can be a **function** instead of a static table. The plugin
-treats it as a provider, calls it at most once per `currency_cache_ttl` seconds
-(default `86400` — once per day), and persists the result to disk under
-`stdpath("cache")`, so rates are pulled once per day even across Neovim
-restarts. Conversions stay instant; only the first conversion of the day pays
-the fetch cost. If the provider errors, the last cached rates are reused.
+The quickest setup uses a built-in provider by name:
+
+```lua
+currency_rates = "er-api", -- async curl to open.er-api.com, pulled once per day
+```
+
+`currency_rates` can also be a **function** provider. It is **async**: the
+plugin schedules it off the completion path and hands it a `done` callback, so
+it never blocks Neovim. Call `done(rates)` with a `code -> rate` table when your
+fetch finishes (call `done({})` on failure to keep the previous cached rates).
+Results are persisted to disk under `stdpath("cache")` and reused for
+`currency_cache_ttl` seconds (default `86400` — once per day), even across
+restarts. Until the first fetch resolves, conversions use the cached (or empty)
+rates; they never wait on the network.
+
+> **Your provider must be non-blocking.** Use `vim.system` (async) rather than
+> `vim.fn.system`, and always pass a timeout so a hung host cannot wedge the
+> fetch. A blocking provider defeats the point and can freeze the editor.
 
 The plugin stays network-free itself — you decide how rates are fetched:
 
 ```lua
-currency_rates = function()
-  -- run once per day; fetch however you like (curl, plenary, a local file…)
-  local out = vim.fn.system({ "curl", "-s", "https://open.er-api.com/v6/latest/USD" })
-  local ok, body = pcall(vim.json.decode, out)
-  if not ok or not body or not body.rates then
-    return {} -- empty -> previous cached rates are kept
-  end
-  -- this API returns "units of <code> per 1 USD"; convert(value, from, to)
-  -- uses value * rates[from] / rates[to], so invert to get "USD per unit".
-  local rates = {}
-  for code, per_usd in pairs(body.rates) do
-    rates[code:lower()] = 1 / per_usd
-  end
-  return rates
+currency_rates = function(done)
+  -- runs once per day, off the completion path; never block here
+  vim.system(
+    { "curl", "-s", "--max-time", "10", "https://open.er-api.com/v6/latest/USD" },
+    { text = true },
+    function(out)
+      local ok, body = pcall(vim.json.decode, out.stdout or "")
+      if not ok or not body or not body.rates then
+        return done({}) -- empty -> previous cached rates are kept
+      end
+      -- this API returns "units of <code> per 1 USD"; convert(value, from, to)
+      -- uses value * rates[from] / rates[to], so invert to get "USD per unit".
+      local rates = {}
+      for code, per_usd in pairs(body.rates) do
+        rates[code:lower()] = 1 / per_usd
+      end
+      done(rates)
+    end
+  )
 end,
 ```
 

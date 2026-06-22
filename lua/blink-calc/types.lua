@@ -43,7 +43,7 @@
 ---@field disabled_filetypes? string[] filetypes in which the source is disabled
 ---@field buffer_variables? boolean resolve `name = expr` assignments from earlier buffer lines
 ---@field copy_register? false|string register to copy the accepted result into
----@field currency_rates? table<string, number>|fun():table<string, number> static rate table, or a provider function pulled at most once per day
+---@field currency_rates? table<string, number>|fun(done: fun(rates: table<string, number>))|string static rate table, an async provider invoked as provider(done), or a built-in provider name (e.g. "er-api"); providers are pulled at most once per day
 ---@field currency_cache_ttl? integer seconds a fetched rate table is reused before re-pulling (default 86400)
 
 ---@class BlinkCalc.DefaultOptions
@@ -61,7 +61,7 @@
 ---@field disabled_filetypes string[] filetypes in which the source is disabled
 ---@field buffer_variables boolean resolve assignments from earlier buffer lines
 ---@field copy_register false|string register to copy the accepted result into
----@field currency_rates table<string, number>|fun():table<string, number> static rate table, or a provider function pulled at most once per day
+---@field currency_rates table<string, number>|fun(done: fun(rates: table<string, number>))|string static rate table, an async provider invoked as provider(done), or a built-in provider name (e.g. "er-api"); providers are pulled at most once per day
 ---@field currency_cache_ttl integer seconds a fetched rate table is reused before re-pulling
 
 ---@class BlinkCalc.Options
@@ -79,7 +79,7 @@
 ---@field disabled_filetypes string[] filetypes in which the source is disabled
 ---@field buffer_variables boolean resolve assignments from earlier buffer lines
 ---@field copy_register false|string register to copy the accepted result into
----@field currency_rates table<string, number>|fun():table<string, number> static rate table, or a provider function pulled at most once per day
+---@field currency_rates table<string, number>|fun(done: fun(rates: table<string, number>))|string static rate table, an async provider invoked as provider(done), or a built-in provider name (e.g. "er-api"); providers are pulled at most once per day
 ---@field currency_cache_ttl integer seconds a fetched rate table is reused before re-pulling
 ---@field variables? table<string, any> resolved buffer variables injected into evaluation
 

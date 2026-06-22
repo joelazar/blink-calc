@@ -20,11 +20,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: mrcjkb/lua-typecheck-action@v1.1.0
+      - uses: rhysd/action-setup-vim@v1
         with:
-          directories: lua/
-          checklevel: Warning
-          configpath: .luarc.json
+          neovim: true
+          version: stable
+      - uses: jdx/mise-action@v2
+      - name: Typecheck
+        run: make typecheck
 
   test:
     runs-on: ubuntu-latest

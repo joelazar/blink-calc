@@ -248,13 +248,13 @@ end)
 -- #9 Copy to register --------------------------------------------------------
 describe("copy on accept", function()
   it("yanks the accepted result to the configured register", function()
-    local s = source.new({ copy_register = "+" })
+    local s = source.new({ copy_register = "z" })
     local r
     s:get_completions({ line = "2+2", cursor = { 1, 3 }, bufnr = 0 }, function(res)
       r = res
     end)
     s:execute(nil, r.items[1], function() end, function() end)
-    assert.are.equal("4", vim.fn.getreg("+"))
+    assert.are.equal("4", vim.fn.getreg("z"))
   end)
 end)
 

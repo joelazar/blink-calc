@@ -6,7 +6,7 @@ local defaults = {
   show_equation = true,
   show_bases = false,
   group_digits = false,
-  precision = 4,
+  precision = 2,
   separator = " = ",
   angle = "rad",
   notation = "auto",

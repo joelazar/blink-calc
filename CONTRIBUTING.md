@@ -6,11 +6,11 @@ Thank you for your interest in contributing to blink-calc!
 
 ### Prerequisites
 
-| Tool | Version | Required for | Install |
-|------|---------|--------------|---------|
-| [Neovim](https://github.com/neovim/neovim) | ≥ 0.12.2 | tests, dev | [releases](https://github.com/neovim/neovim/releases) |
-| [StyLua](https://github.com/JohnnyMorganz/StyLua) | 2.4.1 | lint, format | [releases](https://github.com/JohnnyMorganz/StyLua/releases) |
-| [lua-language-server](https://github.com/LuaLS/lua-language-server) | latest | type checking | [releases](https://github.com/LuaLS/lua-language-server/releases) |
+| Tool                                                                | Version  | Required for  | Install                                                           |
+| ------------------------------------------------------------------- | -------- | ------------- | ----------------------------------------------------------------- |
+| [Neovim](https://github.com/neovim/neovim)                          | ≥ 0.12.3 | tests, dev    | [releases](https://github.com/neovim/neovim/releases)             |
+| [StyLua](https://github.com/JohnnyMorganz/StyLua)                   | 2.4.1    | lint, format  | [releases](https://github.com/JohnnyMorganz/StyLua/releases)      |
+| [lua-language-server](https://github.com/LuaLS/lua-language-server) | latest   | type checking | [releases](https://github.com/LuaLS/lua-language-server/releases) |
 
 ### Clone and verify
 
@@ -24,15 +24,15 @@ Tests auto-install their dependencies ([mini.test](https://github.com/echasnovsk
 
 ## Make Targets
 
-| Target | Description |
-|--------|-------------|
-| `make test` | Run all tests |
-| `make test-one MODULE=calc` | Run a single test file (`tests/calc_spec.lua`) |
-| `make lint` | Check formatting with StyLua (`--check`) |
-| `make format` | Auto-format Lua files with StyLua |
-| `make typecheck` | Type check with lua-language-server |
-| `make check` | Run lint + typecheck + test |
-| `make dev` | Launch Neovim with repro config for manual testing |
+| Target                      | Description                                        |
+| --------------------------- | -------------------------------------------------- |
+| `make test`                 | Run all tests                                      |
+| `make test-one MODULE=calc` | Run a single test file (`tests/calc_spec.lua`)     |
+| `make lint`                 | Check formatting with StyLua (`--check`)           |
+| `make format`               | Auto-format Lua files with StyLua                  |
+| `make typecheck`            | Type check with lua-language-server                |
+| `make check`                | Run lint + typecheck + test                        |
+| `make dev`                  | Launch Neovim with repro config for manual testing |
 
 ## Project Layout
 
@@ -63,8 +63,8 @@ versioning via release-please:
 
 ## CI
 
-| Workflow | Trigger | Jobs |
-|----------|---------|------|
-| `ci.yml` | Push/PR to `main` | StyLua lint, lua-language-server typecheck, tests (stable + nightly) |
-| `release-github.yml` | Push to `main` | release-please (changelog + GitHub release) |
-| `release-luarocks.yml` | Tag `v*.*.*` | LuaRocks publish |
+| Workflow               | Trigger           | Jobs                                                                 |
+| ---------------------- | ----------------- | -------------------------------------------------------------------- |
+| `ci.yml`               | Push/PR to `main` | StyLua lint, lua-language-server typecheck, tests (stable + nightly) |
+| `release-github.yml`   | Push to `main`    | release-please (changelog + GitHub release)                          |
+| `release-luarocks.yml` | Tag `v*.*.*`      | LuaRocks publish                                                     |

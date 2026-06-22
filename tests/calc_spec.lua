@@ -114,7 +114,7 @@ end)
 
 describe("constants and aliases", function()
   it("knows pi: 2*pi", function()
-    assert.is_truthy(first("2*pi"):match("^6%.283"))
+    assert.is_truthy(first("2*pi"):match("^6%.28"))
   end)
 
   it("knows e via ln: ln(e)", function()
@@ -122,7 +122,7 @@ describe("constants and aliases", function()
   end)
 
   it("knows phi: 2*phi", function()
-    assert.is_truthy(first("2*phi"):match("^3%.236"))
+    assert.is_truthy(first("2*phi"):match("^3%.24"))
   end)
 
   it("knows tau: tau/2", function()

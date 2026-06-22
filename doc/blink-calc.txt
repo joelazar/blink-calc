@@ -91,7 +91,7 @@ Options are passed through the blink.cmp provider `opts` table:
     show_equation = true,      -- extra "expr = result" item when typing '=' (boolean)
     show_bases = false,        -- extra hex/binary items for integer results (boolean)
     group_digits = false,      -- grouped item for large integers; true uses ',' or a custom separator string
-    precision = 4,             -- decimal places used to tame floating-point noise (integer)
+    precision = 2,             -- decimal places used to tame floating-point noise (integer)
     separator = " = ",         -- text between expression and result in the equation item (string)
     angle = "rad",             -- angle unit for trig functions: "rad" or "deg"
     notation = "auto",         -- numeric output: "auto", "fixed", or "scientific"

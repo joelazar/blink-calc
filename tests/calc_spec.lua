@@ -54,6 +54,34 @@ describe("source contract", function()
   end)
 end)
 
+describe("sandbox", function()
+  local Calc = require("blink-calc.calc")
+
+  it("does not execute vim.notify on the buffer line", function()
+    local fired = false
+    local saved = vim.notify
+    vim.notify = function()
+      fired = true
+    end
+    local r = complete('vim.notify("test Shift+A")')
+    vim.notify = saved
+    assert.is_false(fired)
+    assert.is_nil(r and r.items and r.items[1] and r.items[1].label)
+  end)
+
+  it("blocks os, io, load, and print", function()
+    for _, evil in ipairs({
+      'os.execute("touch /tmp/blink_calc_pwn")',
+      'io.write("x")',
+      'load("return 1")()',
+      'print("x")',
+      'getmetatable("").foo',
+    }) do
+      assert.is_nil(Calc.evaluate(evil, {}), evil)
+    end
+  end)
+end)
+
 describe("evaluation", function()
   it("adds: 2+2", function()
     assert.are.equal("4", complete("2+2").items[1].label)

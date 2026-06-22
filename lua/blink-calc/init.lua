@@ -99,7 +99,7 @@ local function passes_gating(expr, opts)
   return true
 end
 
----@param result number
+---@param result number|boolean|table|string
 ---@param opts BlinkCalc.Options
 ---@return lsp.MarkupContent?
 local function build_documentation(result, opts)

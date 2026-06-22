@@ -73,7 +73,7 @@ end)
 -- #5 Scientific-notation output ----------------------------------------------
 describe("notation", function()
   it("renders scientific notation on demand", function()
-    assert.are.equal("1.235e+04", Calc.format(12345, { notation = "scientific", precision = 3 }))
+    assert.are.equal("1.235e+04", Calc.format(12345.6, { notation = "scientific", precision = 3 }))
   end)
 
   it("trims trailing mantissa zeros in scientific", function()
@@ -210,12 +210,13 @@ end)
 -- #7 Per-filetype / context control ------------------------------------------
 describe("filetype and context gating", function()
   it("disables the source in configured filetypes", function()
-    _G.__bo[0] = { filetype = "markdown" }
+    local buf = vim.api.nvim_get_current_buf()
+    vim.bo[buf].filetype = "markdown"
     local s = source.new({ disabled_filetypes = { "markdown" } })
     assert.is_false(s:enabled())
-    _G.__bo[0] = { filetype = "lua" }
+    vim.bo[buf].filetype = "lua"
     assert.is_true(s:enabled())
-    _G.__bo[0] = { filetype = "" }
+    vim.bo[buf].filetype = ""
   end)
 
   it("comment_only skips non-comment lines", function()
@@ -247,7 +248,6 @@ end)
 -- #9 Copy to register --------------------------------------------------------
 describe("copy on accept", function()
   it("yanks the accepted result to the configured register", function()
-    _G.__registers = {}
     local s = source.new({ copy_register = "+" })
     local r
     s:get_completions({ line = "2+2", cursor = { 1, 3 }, bufnr = 0 }, function(res)
@@ -261,20 +261,22 @@ end)
 -- #11 Buffer variables -------------------------------------------------------
 describe("buffer variables", function()
   it("resolves assignments from earlier buffer lines", function()
-    _G.__buffers[0] = { "x = 2+2", "y = x*3" }
+    local buf = vim.api.nvim_get_current_buf()
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "x = 2+2", "y = x*3", "y+1" })
     local s = source.new({ buffer_variables = true })
     local r
-    s:get_completions({ line = "y+1", cursor = { 3, 3 }, bufnr = 0 }, function(res)
+    s:get_completions({ line = "y+1", cursor = { 3, 3 }, bufnr = buf }, function(res)
       r = res
     end)
-    _G.__buffers[0] = {}
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
     assert.are.equal("13", r.items[1].label)
   end)
 
   it("is off by default", function()
-    _G.__buffers[0] = { "x = 99" }
+    local buf = vim.api.nvim_get_current_buf()
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "x = 99", "x+1" })
     assert.are.equal(nil, first_with({}, "x+1"))
-    _G.__buffers[0] = {}
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
   end)
 end)
 

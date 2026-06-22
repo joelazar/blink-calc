@@ -118,7 +118,12 @@ local function parse_date(str)
   if not y then
     return nil
   end
-  return make_date(os.time({ year = tonumber(y), month = tonumber(m), day = tonumber(d), hour = 12 }))
+  return make_date(os.time({
+    year = tonumber(y) --[[@as integer]],
+    month = tonumber(m) --[[@as integer]],
+    day = tonumber(d) --[[@as integer]],
+    hour = 12,
+  }))
 end
 
 local function start_of_today()
@@ -571,7 +576,7 @@ function M.format(value, opts)
       end
       return "[" .. table.concat(parts, ", ") .. "]"
     elseif mt == date_mt then
-      return os.date("%Y-%m-%d", value.epoch)
+      return os.date("%Y-%m-%d", value.epoch) --[[@as string]]
     elseif mt == dur_mt then
       return format_number(value.seconds / DAY, opts) .. " days"
     end

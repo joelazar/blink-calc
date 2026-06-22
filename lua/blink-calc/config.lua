@@ -32,7 +32,7 @@ function M.merge(opts)
 
   local function reset(key, expected)
     Util.error(("Invalid '%s' option: expected %s, got %s"):format(key, expected, type(config[key])))
-    config[key] = vim.deepcopy(defaults[key])
+    config[key] = vim.deepcopy(defaults[key] --[[@as any]])
   end
 
   if type(config.show_equation) ~= "boolean" then

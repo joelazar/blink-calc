@@ -20,6 +20,7 @@
 ---@field get_trigger_characters fun(self: BlinkCalc.Source): string[] characters that trigger completion
 ---@field enabled fun(self: BlinkCalc.Source): boolean whether the source is active
 ---@field get_completions fun(self: BlinkCalc.Source, ctx: blink.cmp.Context, callback: fun(response?: blink.cmp.CompletionResponse)) produce calc completions
+---@field execute fun(self: BlinkCalc.Source, ctx: blink.cmp.Context, item: table, callback: fun(), default_implementation?: fun()) accept hook: update ans and copy result
 
 -- lua/blink-calc/config.lua ---------------------------------------------------
 
@@ -33,6 +34,17 @@
 ---@field group_digits? boolean|string offer a digit-grouped item; true uses ',', or pass a custom separator
 ---@field precision? integer decimal places used to tame floating-point noise
 ---@field separator? string text placed between expression and result in the equation item
+---@field angle? "rad"|"deg" angle unit used by trig functions
+---@field notation? "auto"|"fixed"|"scientific" output notation for numeric results
+---@field show_documentation? boolean show alternate forms (hex/bin/sci/grouped) in the docs popup
+---@field min_length? integer minimum expression length before completing
+---@field require_operator? boolean require an operator so bare numbers do not complete
+---@field comment_only? boolean only complete inside comments or strings
+---@field disabled_filetypes? string[] filetypes in which the source is disabled
+---@field buffer_variables? boolean resolve `name = expr` assignments from earlier buffer lines
+---@field copy_register? false|string register to copy the accepted result into
+---@field currency_rates? table<string, number>|fun():table<string, number> static rate table, or a provider function pulled at most once per day
+---@field currency_cache_ttl? integer seconds a fetched rate table is reused before re-pulling (default 86400)
 
 ---@class BlinkCalc.DefaultOptions
 ---@field show_equation boolean offer an extra "expr = result" item when typing with '='
@@ -40,6 +52,17 @@
 ---@field group_digits boolean|string offer a digit-grouped item for large integers
 ---@field precision integer decimal places used to tame floating-point noise
 ---@field separator string text placed between expression and result in the equation item
+---@field angle "rad"|"deg" angle unit used by trig functions
+---@field notation "auto"|"fixed"|"scientific" output notation for numeric results
+---@field show_documentation boolean show alternate forms in the docs popup
+---@field min_length integer minimum expression length before completing
+---@field require_operator boolean require an operator so bare numbers do not complete
+---@field comment_only boolean only complete inside comments or strings
+---@field disabled_filetypes string[] filetypes in which the source is disabled
+---@field buffer_variables boolean resolve assignments from earlier buffer lines
+---@field copy_register false|string register to copy the accepted result into
+---@field currency_rates table<string, number>|fun():table<string, number> static rate table, or a provider function pulled at most once per day
+---@field currency_cache_ttl integer seconds a fetched rate table is reused before re-pulling
 
 ---@class BlinkCalc.Options
 ---@field show_equation boolean offer an extra "expr = result" item when typing with '='
@@ -47,15 +70,32 @@
 ---@field group_digits false|string grouping separator for large integers, or false to disable
 ---@field precision integer decimal places used to tame floating-point noise
 ---@field separator string text placed between expression and result in the equation item
+---@field angle "rad"|"deg" angle unit used by trig functions
+---@field notation "auto"|"fixed"|"scientific" output notation for numeric results
+---@field show_documentation boolean show alternate forms in the docs popup
+---@field min_length integer minimum expression length before completing
+---@field require_operator boolean require an operator so bare numbers do not complete
+---@field comment_only boolean only complete inside comments or strings
+---@field disabled_filetypes string[] filetypes in which the source is disabled
+---@field buffer_variables boolean resolve assignments from earlier buffer lines
+---@field copy_register false|string register to copy the accepted result into
+---@field currency_rates table<string, number>|fun():table<string, number> static rate table, or a provider function pulled at most once per day
+---@field currency_cache_ttl integer seconds a fetched rate table is reused before re-pulling
+---@field variables? table<string, any> resolved buffer variables injected into evaluation
 
 -- lua/blink-calc/calc.lua -----------------------------------------------------
 
 ---@class BlinkCalc.Calc
+---@field ans number last accepted result, referenced as `ans`
+---@field set_ans fun(v: number) store the last accepted result
+---@field make_env fun(opts?: table): table build the sandboxed evaluation environment
+---@field scan_variables fun(lines: string[]): table<string, any> collect `name = expr` assignments
 ---@field find_expression_start fun(line: string, col: integer): integer find 1-indexed start of expression
 ---@field resolve_percentages fun(expr: string): string rewrite percentage phrases as arithmetic
+---@field rewrite_bitwise fun(expr: string): string rewrite infix bitwise operators into function calls
 ---@field preprocess fun(expr: string): string normalize an expression for evaluation
----@field evaluate fun(expr: string): number|nil evaluate a math expression
----@field format fun(n: number, precision: integer): string render a result, taming float noise
+---@field evaluate fun(expr: string, opts?: table): number|boolean|table|string|nil evaluate an expression
+---@field format fun(value: number|boolean|table|string, opts?: table): string render a result
 ---@field to_hex fun(n: number): string render a non-negative integer as a hex literal
 ---@field to_bin fun(n: number): string render a non-negative integer as a binary literal
 ---@field group fun(s: string, sep: string): string group an integer string by thousands

@@ -8,6 +8,17 @@ local defaults = {
   group_digits = false,
   precision = 4,
   separator = " = ",
+  angle = "rad",
+  notation = "auto",
+  show_documentation = true,
+  min_length = 0,
+  require_operator = false,
+  comment_only = false,
+  disabled_filetypes = {},
+  buffer_variables = false,
+  copy_register = false,
+  currency_rates = {},
+  currency_cache_ttl = 86400,
 }
 
 M.defaults = defaults
@@ -21,7 +32,7 @@ function M.merge(opts)
 
   local function reset(key, expected)
     Util.error(("Invalid '%s' option: expected %s, got %s"):format(key, expected, type(config[key])))
-    config[key] = defaults[key]
+    config[key] = vim.deepcopy(defaults[key])
   end
 
   if type(config.show_equation) ~= "boolean" then
@@ -44,6 +55,50 @@ function M.merge(opts)
 
   if type(config.separator) ~= "string" then
     reset("separator", "string")
+  end
+
+  if config.angle ~= "rad" and config.angle ~= "deg" then
+    reset("angle", '"rad" or "deg"')
+  end
+
+  if config.notation ~= "auto" and config.notation ~= "fixed" and config.notation ~= "scientific" then
+    reset("notation", '"auto", "fixed" or "scientific"')
+  end
+
+  if type(config.show_documentation) ~= "boolean" then
+    reset("show_documentation", "boolean")
+  end
+
+  if type(config.min_length) ~= "number" or config.min_length < 0 then
+    reset("min_length", "non-negative number")
+  end
+
+  if type(config.require_operator) ~= "boolean" then
+    reset("require_operator", "boolean")
+  end
+
+  if type(config.comment_only) ~= "boolean" then
+    reset("comment_only", "boolean")
+  end
+
+  if type(config.disabled_filetypes) ~= "table" then
+    reset("disabled_filetypes", "table")
+  end
+
+  if type(config.buffer_variables) ~= "boolean" then
+    reset("buffer_variables", "boolean")
+  end
+
+  if config.copy_register ~= false and type(config.copy_register) ~= "string" then
+    reset("copy_register", "false or string")
+  end
+
+  if type(config.currency_rates) ~= "table" and type(config.currency_rates) ~= "function" then
+    reset("currency_rates", "table or function")
+  end
+
+  if type(config.currency_cache_ttl) ~= "number" or config.currency_cache_ttl <= 0 then
+    reset("currency_cache_ttl", "positive number")
   end
 
   return config

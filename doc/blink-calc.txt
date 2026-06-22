@@ -22,17 +22,29 @@ Table of contents:
 FEATURES                                                  *blink-calc-features*
 
 - Evaluates math expressions in real-time as you type
-- Basic arithmetic operations: `+`, `-`, `*`, `/`
+- Basic arithmetic operations: `+`, `-`, `*`, `/`, power `^`
 - Parentheses for complex expressions
 - Lua math library functions (`sin`, `cos`, `sqrt`, ...) plus `ln`, `log2`,
   `log10`, `mod`
+- Trigonometry in radians or degrees (`angle = "deg"`)
 - Constants: `pi`, `e`, `phi`, `tau`
 - Factorial `5!` and combinatorics: `fact`, `gcd`, `lcm`, `perm`, `comb`
 - Statistics: `sum`, `avg`, `mean`, `median`, `min`, `max`
-- Bitwise functions: `band`, `bor`, `bxor`, `bnot`, `lshift`, `rshift`
+- Boolean & comparison expressions: `2+2 >= 3`, `5 == 5`, `5 ~= 6`
+- Bitwise functions plus infix operators: `5 & 3`, `12 | 3`, `12 ~ 10`,
+  `1 << 4`, `16 >> 2`
+- Vectors: `vec`, `dot`, `cross`, `mag`, `norm`
 - Percentages: `20% of 150`, `150 + 20%`, `50%`
+- `ans` references the last accepted result
 - Number bases: `0xFF`/`0b1010` input and optional hex/binary result items
+- Scientific / fixed output notation (`notation`)
 - Digit separators in input (`1_000_000`) and optional grouped result items
+- Unit & currency conversion: `5 km to mi`, `convert(100, "c", "f")`
+- Date math: `2024-01-10 - 2024-01-01`, `today + 3 days`
+- Optional buffer variables (`buffer_variables`)
+- Works inside comments; context gating per filetype/comment/operator
+- Rich documentation popup with alternate forms (`show_documentation`)
+- Copy the accepted result to a register (`copy_register`)
 - Configurable result precision and equation separator
 - The bare result, the full `expr = result`, and optional base/grouped items
 
@@ -76,11 +88,23 @@ Options are passed through the blink.cmp provider `opts` table:
 
 >lua
   {
-    show_equation = true, -- extra "expr = result" item when typing '=' (boolean)
-    show_bases = false,   -- extra hex/binary items for integer results (boolean)
-    group_digits = false, -- grouped item for large integers; true uses ',' or a custom separator string
-    precision = 10,       -- decimal places used to tame floating-point noise (integer)
-    separator = " = ",    -- text between expression and result in the equation item (string)
+    show_equation = true,      -- extra "expr = result" item when typing '=' (boolean)
+    show_bases = false,        -- extra hex/binary items for integer results (boolean)
+    group_digits = false,      -- grouped item for large integers; true uses ',' or a custom separator string
+    precision = 4,             -- decimal places used to tame floating-point noise (integer)
+    separator = " = ",         -- text between expression and result in the equation item (string)
+    angle = "rad",             -- angle unit for trig functions: "rad" or "deg"
+    notation = "auto",         -- numeric output: "auto", "fixed", or "scientific"
+    show_documentation = true, -- show hex/binary/scientific/grouped forms in the docs popup (boolean)
+    min_length = 0,            -- minimum expression length before completing (integer)
+    require_operator = false,  -- require an operator so bare numbers do not complete (boolean)
+    comment_only = false,      -- only complete inside comments or strings (boolean)
+    disabled_filetypes = {},   -- filetypes in which the source is disabled (string[])
+    buffer_variables = false,  -- resolve `name = expr` assignments from earlier lines (boolean)
+    copy_register = false,     -- register to copy the accepted result into, e.g. "+" (false or string)
+    currency_rates = {},       -- currency code -> value in a shared base unit
+                               -- (table, or a function pulled once per day)
+    currency_cache_ttl = 86400, -- seconds a provider's rates are reused (integer)
   }
 <
 
@@ -98,8 +122,16 @@ Type a math expression and the completion menu shows the result:
 - `20% of 150`     → `30`
 - `150 + 20%`      → `180`
 - `band(12,10)`    → `8`
+- `5 & 3`          → `1`; `1 << 4` → `16`
+- `2+2 >= 3`       → `true`
+- `sin(30)`        → `0.5` (with `angle = "deg"`)
+- `dot(vec(1,2,3), vec(4,5,6))` → `32`
+- `ans + 2`        → adds `2` to the last accepted result
+- `5 km to mi`     → `3.1069`; `convert(100, "c", "f")` → `212`
+- `2024-01-10 - 2024-01-01` → `9`; `today + 3 days` → a date
 - `0xFF`           → `255` (with `show_bases`, also `0xFF`, `0b11111111`)
 - `1_000_000`      → `1000000` (with `group_digits`, also `1,000,000`)
+- `1500000`        → `1.5e+06` (with `notation = "scientific"`)
 
 ================================================================================
 DEVELOPMENT                                            *blink-calc-development*
